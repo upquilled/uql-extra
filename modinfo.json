@@ -1,0 +1,13 @@
+{
+	"id": "uql.extra",
+	"name": "Extra Parameters",
+	"version": "1.0.0",
+	"authors": "upquilled",
+	"description": "Provides various extra parameters to modinfo.json<LINE><LINE>`exclude_steam` - globs to exclude when uploading the mod to Steam; either a list/string or a dictionary with keys `globs` (list/string) and (optional) `delete_temp` (bool), the latter of which will determine whether or not to delete the temporary upload directory. By default, it is FALSE.",
+	"tags": ["Tools"],
+	"checksum_override_version": false,
+	"uql.extra": {
+		"exclude_steam": ["source/**", "thumbnail.svg", ".git/**", ".gitattributes", ".gitignore", "*.DS_Store", "README.md", "Thumbs.db", "*.tmp"],
+		"delete_temp": true
+	}
+}
