@@ -2,16 +2,13 @@
 using System.Security;
 using System.Security.Permissions;
 using BepInEx.Logging;
-using IL.Menu;
-using System.CodeDom;
-using UnityEngine.UI;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 
 namespace UQLExtra;
 
-[BepInPlugin("uql.extra", "Extra Parameters", "1.0.0")]
+[BepInPlugin("uql.extra", "Extra Parameters", "1.0.2")]
 public partial class UQLExtra : BaseUnityPlugin
 {
     internal static ManualLogSource LoggerInstance;

@@ -1,6 +1,6 @@
-using UQLExtra.Params;
+using UQLExtra.Parameters;
 using System.IO;
-using System.Threading.Tasks;
+using Steamworks;
 using System;
 
 namespace UQLExtra
@@ -11,27 +11,23 @@ namespace UQLExtra
         {
             HookExcludeSteam();
         }
-
         private static void HookExcludeSteam()
         {
             On.RainWorldSteamManager.UploadWorkshopMod += (orig, self, mod, unlisted) =>
             {
                 ExcludeSteam.PrepareUpload(mod, out string tempDir, out bool deleteAfter);
                 bool result = orig(self, mod, unlisted);
-                if (deleteAfter) Task.Run(async () =>
+                if (deleteAfter)
+                    try
                     {
-                        await Task.Delay(ExcludeSteam.deletionDelay);
-                        try
-                        {
-                            if (Directory.Exists(tempDir))
-                                Directory.Delete(tempDir, true);
-                            UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Temporary directory {tempDir} has been deleted.");
-                        }
-                        catch (Exception ex)
-                        {
-                            UnityEngine.Debug.LogError($"[{UQLExtra.info.Metadata.Name}] Failed to delete temp directory {tempDir}: {ex.Message}");
-                        }
-                    });
+                        RelativePath.CoroutineRunner.Instance.StartCoroutine(ExcludeSteam.DeleteAfterUploadFinishes(self, tempDir));
+                    }
+                    catch (Exception ex)
+                    {
+                        UnityEngine.Debug.LogError($"[{UQLExtra.info.Metadata.Name}] Failed to start cleanup coroutine for {tempDir}: {ex}");
+                    }
+
+
                 return result;
             };
         }
