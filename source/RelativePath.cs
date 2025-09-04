@@ -24,6 +24,7 @@ public static class RelativePath
     public static bool MatchesGlob(string filePath, string glob)
     {
         var regex = "^" + Regex.Escape(glob)
+            .Replace(@"\*\*/", ".*")
             .Replace(@"\*\*", ".*")
             .Replace(@"\*", @"[^/]*")
             .Replace(@"\?", ".") + "$";

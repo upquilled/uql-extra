@@ -1,7 +1,7 @@
 {
   "id": "uql.extra",
   "name": "Extra Parameters",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "authors": "upquilled",
   "description": "Provides various extra parameters to modinfo.json<LINE><LINE>`exclude_steam` - globs to exclude when uploading the mod to Steam; either a list/string or a dictionary with keys `globs` (list/string) and (optional) `delete_temp` (bool), the latter of which will determine whether or not to delete the temporary upload directory. By default, it is FALSE.<LINE><LINE>Github Repository: https://github.com/upquilled/uql-extra",
   "tags": [
