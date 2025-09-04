@@ -32,6 +32,7 @@ namespace UQLExtra.Parameters
             }
 
             deleteAfter = false;
+            bool keepDependency = false;
 
             // Modify modinfo.json if uql.extra contains only exclude_steam
             string modInfoPath = Path.Combine(tempDir, "modinfo.json");
@@ -44,37 +45,19 @@ namespace UQLExtra.Parameters
 
                     if (RelativePath.TryGetValue(modInfo, "uql.extra", out var extraToken) && extraToken is JsonObject extra)
                     {
-                        if (extra["exclude_steam"] is JsonObject excludeSteam) deleteAfter = (excludeSteam["delete_temp"] as bool?) ?? false;
-                        if (extra[1] == null && extra.HasProperty("exclude_steam"))
+                        if (extra["exclude_steam"] is JsonObject excludeSteam)
                         {
-                            if (RelativePath.TryGetValue(modInfo, "requirements", out var reqToken) && reqToken is JsonArray reqArray)
-                            {
-                                JsonArray newArray = new JsonArray();
-                                JsonArray newNameArray = new JsonArray();
-                                int i;
-                                int b = 0;
-                                JsonArray? reqNameArray = modInfo["requirements_names"] as JsonArray;
-
-                                for (i = 0; reqArray[i] != null; i++)
-                                {
-                                    if (reqArray[i] as string == "uql.extra")
-                                    {
-                                        b++;
-                                        continue;
-                                    }
-                                    newArray.Add(reqArray[i]);
-                                    if (reqNameArray != null)
-                                        newNameArray.Add(reqNameArray[i]);
-                                }
-                                modInfo["requirements"] = newArray;
-                                if (reqNameArray != null) modInfo["requirements_names"] = newNameArray;
-                            }
-
-                            UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Removed uql.extra dependency from modinfo for {mod.id} because it only contained exclude_steam");
+                            deleteAfter = (excludeSteam["delete_temp"] as bool?) ?? false;
+                            keepDependency = (excludeSteam["keep_dependency"] as bool?) ?? false;
                         }
+
+                        if (extra[0] == null || (extra[1] == null && extra.HasProperty("exclude_steam")))
+                            removeDependency(modInfo, keepDependency, mod.id);
+
 
                         File.WriteAllText(modInfoPath, JsonObject.ToJsonString(modInfo));
                     }
+                    else removeDependency(modInfo, keepDependency, mod.id);
                 }
                 catch (Exception ex)
                 {
@@ -161,6 +144,37 @@ namespace UQLExtra.Parameters
             catch (Exception ex)
             {
                 UnityEngine.Debug.LogError($"[{UQLExtra.info.Metadata.Name}] Failed to delete temp folder: {ex.Message}");
+            }
+        }
+
+        private static void removeDependency(JsonObject modInfo, bool keepDependency, string id)
+        {
+            if (!keepDependency)
+            {
+                if (RelativePath.TryGetValue(modInfo, "requirements", out var reqToken) && reqToken is JsonArray reqArray)
+                {
+                    JsonArray newArray = new JsonArray();
+                    JsonArray newNameArray = new JsonArray();
+                    int i;
+                    int b = 0;
+                    JsonArray? reqNameArray = modInfo["requirements_names"] as JsonArray;
+
+                    for (i = 0; reqArray[i] != null; i++)
+                    {
+                        if (reqArray[i] as string == "uql.extra")
+                        {
+                            b++;
+                            continue;
+                        }
+                        newArray.Add(reqArray[i]);
+                        if (reqNameArray != null)
+                            newNameArray.Add(reqNameArray[i]);
+                    }
+                    modInfo["requirements"] = newArray;
+                    if (reqNameArray != null) modInfo["requirements_names"] = newNameArray;
+                }
+
+                UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Removed uql.extra dependency from modinfo for {id} because no relevant parameters were found in modinfo,json");
             }
         }
     }
