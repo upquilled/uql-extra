@@ -20,8 +20,8 @@ namespace UQLExtra.Parameters
 
             (List<string>, List<string>) patterns = GetPatterns(mod);
 
-            List<string> excludePatterns = patterns.Item1;
-            List<string> includePatterns = patterns.Item2;
+            List<string> includePatterns = patterns.Item1;
+            List<string> excludePatterns = patterns.Item2;
 
             foreach (var file in Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories))
             {
@@ -92,9 +92,10 @@ namespace UQLExtra.Parameters
 
             void add(string pattern)
             {
-                if (pattern.StartsWith("!"))
-                    include.Add(pattern.Substring(1));
-                else exclude.Add(pattern);
+                if (pattern.StartsWith("!")) {
+                    if (pattern.Length > 1)
+                        include.Add(pattern.Substring(1));
+                } else if (pattern.Length > 0) exclude.Add(pattern);
             }
 
             string modInfoPath = Path.Combine(mod.path, "modinfo.json");
