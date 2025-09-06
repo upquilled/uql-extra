@@ -1,6 +1,4 @@
 using UQLExtra.Parameters;
-using System.IO;
-using Steamworks;
 using System;
 
 namespace UQLExtra

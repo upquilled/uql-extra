@@ -18,12 +18,15 @@ namespace UQLExtra.Parameters
 
             Directory.CreateDirectory(tempDir);
 
-            List<string> excludePatterns = GetExcludePatterns(mod);
+            (List<string>, List<string>) patterns = GetPatterns(mod);
+
+            List<string> excludePatterns = patterns.Item1;
+            List<string> includePatterns = patterns.Item2;
 
             foreach (var file in Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories))
             {
                 string relative = RelativePath.GetRelativePath(sourceDir, file);
-                if (!excludePatterns.Any(glob => RelativePath.MatchesGlob(relative, glob)))
+                if (includePatterns.Any(glob => RelativePath.MatchesGlob(relative, glob)) || !excludePatterns.Any(glob => RelativePath.MatchesGlob(relative, glob)))
                 {
                     string dest = Path.Combine(tempDir, relative);
                     Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
@@ -82,13 +85,21 @@ namespace UQLExtra.Parameters
             return tempDir;
         }
 
-        private static List<string> GetExcludePatterns(ModManager.Mod mod)
+        private static (List<string>, List<string>) GetPatterns(ModManager.Mod mod)
         {
-            List<string> patterns = new();
+            List<string> exclude = new();
+            List<string> include = new();
+
+            void add(string pattern)
+            {
+                if (pattern.StartsWith("!"))
+                    include.Add(pattern.Substring(1));
+                else exclude.Add(pattern);
+            }
 
             string modInfoPath = Path.Combine(mod.path, "modinfo.json");
             if (!File.Exists(modInfoPath))
-                return patterns;
+                return (include,exclude);
 
             try
             {
@@ -98,23 +109,25 @@ namespace UQLExtra.Parameters
                 if (RelativePath.TryGetValue(modInfo, "uql.extra", out var extraToken))
                 {
                     var extra = extraToken as JsonObject;
-                    if (extra == null) return patterns;
+                    if (extra == null) return (include,exclude);
 
                     if (extra["exclude_steam"] is JsonObject excludeSteam && RelativePath.TryGetValue(excludeSteam, "globs", out var steamToken) || RelativePath.TryGetValue(extra, "exclude_steam", out steamToken))
                     {
                         if (steamToken is JsonArray arrayToken)
                         {
                             for (int i = 0; i < arrayToken.Length; i++)
-                                if (arrayToken[i] is string pattern) patterns.Add(pattern);
+                                if (arrayToken[i] is string pattern) exclude.Add(pattern);
                         }
 
                         else if (steamToken is string pattern)
-                            patterns.Add(pattern);
+                            add(pattern);
                     }
 
-                    if (patterns.Count > 0)
+                    int totalCount = exclude.Count + include.Count;
+
+                    if (totalCount > 0)
                     {
-                        UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Loaded {patterns.Count} steam exclude patterns for mod {mod.id}");
+                        UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Loaded {totalCount} steam exclude patterns for mod {mod.id}");
                     }
                 }
             }
@@ -123,7 +136,7 @@ namespace UQLExtra.Parameters
                 UnityEngine.Debug.LogWarning($"[{UQLExtra.info.Metadata.Name}] Failed to read exclude_steam from {modInfoPath}: {ex.Message}");
             }
 
-            return patterns;
+            return (include,exclude);
         }
 
         internal static IEnumerator DeleteAfterUploadFinishes(RainWorldSteamManager manager, string tempDir)
