@@ -92,10 +92,14 @@ namespace UQLExtra.Parameters
 
             void add(string pattern)
             {
-                if (pattern.StartsWith("!")) {
+                if (pattern.Length == 0) return;
+
+                if (pattern[0] == '!')
+                {
                     if (pattern.Length > 1)
                         include.Add(pattern.Substring(1));
-                } else if (pattern.Length > 0) exclude.Add(pattern);
+                }
+                else exclude.Add(pattern);
             }
 
             string modInfoPath = Path.Combine(mod.path, "modinfo.json");
@@ -117,7 +121,7 @@ namespace UQLExtra.Parameters
                         if (steamToken is JsonArray arrayToken)
                         {
                             for (int i = 0; i < arrayToken.Length; i++)
-                                if (arrayToken[i] is string pattern) exclude.Add(pattern);
+                                if (arrayToken[i] is string pattern) add(pattern);
                         }
 
                         else if (steamToken is string pattern)
@@ -152,7 +156,7 @@ namespace UQLExtra.Parameters
                 if (Directory.Exists(tempDir))
                 {
                     Directory.Delete(tempDir, true);
-                    UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Temporary folder deleted: {tempDir}");
+                    UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Temporary folder deleted: {tempDir.Replace(Path.DirectorySeparatorChar, '/')}");
                 }
             }
             catch (Exception ex)
