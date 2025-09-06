@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using Kittehface.Build.Json;
@@ -21,18 +22,49 @@ public static class RelativePath
             return path + Path.DirectorySeparatorChar;
         return path;
     }
-    public static bool MatchesGlob(string filePath, string glob)
+
+    public static string GlobToRegex(string glob)
     {
-        var regex = "^" + Regex.Escape(glob)
+
+        glob = Regex.Replace(glob, @"(\\(?!\*)|/)+", "/");
+
+        if (glob.Length > 0 && glob[0] == '/') glob = glob.Substring(1);
+
+        string regex = "^" + Regex.Escape(glob)
             .Replace("\u0000", "")
+            .Replace("\uFFFF", "")
+            .Replace(@"\\\\", "\uFFFF")
             .Replace(@"\\\*", "\u0000")
-            .Replace(@"\*\*/", "*(.*/)*")
+            .Replace(@"\*\*/", "(.*/)?")
             .Replace(@"\*\*", ".*")
             .Replace(@"\*", @"[^/]*")
             .Replace("\u0000", @"\*")
-            .Replace(@"\\!", "!")
-            .Replace(@"\?", ".") + "$";
-        return Regex.IsMatch(filePath, regex, RegexOptions.IgnoreCase);
+            .Replace(@"\\\?", "\u0000")
+            .Replace(@"\?", "[^/]")
+            .Replace("\u0000", @"\?")
+            .Replace('\uFFFF', '\\') + "$";
+
+        return regex;
+    }
+
+    public static void RegisterGlob(string glob, List<string> normal, List<string> inverted)
+    {
+        if (glob.Length == 0) return;
+
+        bool isInverted = false;
+        if (glob[0] == '!')
+        {
+            if (glob.Length == 1) return;
+            isInverted = true;
+            glob = glob.Substring(1);
+        }
+
+        glob = GlobToRegex(glob);
+
+        if (glob.Length == 0) return;
+
+        if (isInverted) inverted.Add(glob);
+        else normal.Add(glob);
     }
 
     public static string FixRelaxedCommas(string rawJson)

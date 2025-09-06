@@ -5,6 +5,7 @@ using System.Linq;
 using Kittehface.Build.Json;
 using System.Collections;
 using UnityEngine;
+using System.Text.RegularExpressions;
 
 namespace UQLExtra.Parameters
 {
@@ -18,15 +19,15 @@ namespace UQLExtra.Parameters
 
             Directory.CreateDirectory(tempDir);
 
-            (List<string>, List<string>) patterns = GetPatterns(mod);
-
-            List<string> includePatterns = patterns.Item1;
-            List<string> excludePatterns = patterns.Item2;
+            List<string> excludePatterns = [];
+            List<string> includePatterns = [];
+            
+            GetPatterns(mod, excludePatterns, includePatterns);
 
             foreach (var file in Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories))
             {
                 string relative = RelativePath.GetRelativePath(sourceDir, file);
-                if (includePatterns.Any(glob => RelativePath.MatchesGlob(relative, glob)) || !excludePatterns.Any(glob => RelativePath.MatchesGlob(relative, glob)))
+                if (includePatterns.Any(glob => Regex.IsMatch(relative, glob)) || !excludePatterns.Any(glob =>  Regex.IsMatch(relative, glob)))
                 {
                     string dest = Path.Combine(tempDir, relative);
                     Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
@@ -54,7 +55,8 @@ namespace UQLExtra.Parameters
                             keepDependency = (excludeSteam["keep_dependency"] as bool?) ?? false;
                         }
 
-                        if (extra[0] == null || (extra[1] == null && extra.HasProperty("exclude_steam")))
+                        if (extra[0] == null
+                        || (extra[1] == null && extra.HasProperty("exclude_steam")))
                             removeDependency(modInfo, keepDependency, mod.id);
 
 
@@ -85,26 +87,12 @@ namespace UQLExtra.Parameters
             return tempDir;
         }
 
-        private static (List<string>, List<string>) GetPatterns(ModManager.Mod mod)
+        private static void GetPatterns(ModManager.Mod mod, List<String> exclude, List<String> include)
         {
-            List<string> exclude = new();
-            List<string> include = new();
-
-            void add(string pattern)
-            {
-                if (pattern.Length == 0) return;
-
-                if (pattern[0] == '!')
-                {
-                    if (pattern.Length > 1)
-                        include.Add(pattern.Substring(1));
-                }
-                else exclude.Add(pattern);
-            }
 
             string modInfoPath = Path.Combine(mod.path, "modinfo.json");
             if (!File.Exists(modInfoPath))
-                return (include,exclude);
+                return;
 
             try
             {
@@ -114,25 +102,26 @@ namespace UQLExtra.Parameters
                 if (RelativePath.TryGetValue(modInfo, "uql.extra", out var extraToken))
                 {
                     var extra = extraToken as JsonObject;
-                    if (extra == null) return (include,exclude);
+                    if (extra == null) return;
 
                     if (extra["exclude_steam"] is JsonObject excludeSteam && RelativePath.TryGetValue(excludeSteam, "globs", out var steamToken) || RelativePath.TryGetValue(extra, "exclude_steam", out steamToken))
                     {
                         if (steamToken is JsonArray arrayToken)
                         {
                             for (int i = 0; i < arrayToken.Length; i++)
-                                if (arrayToken[i] is string pattern) add(pattern);
+                                if (arrayToken[i] is string pattern)
+                                    RelativePath.RegisterGlob(pattern, exclude, include);
                         }
 
                         else if (steamToken is string pattern)
-                            add(pattern);
+                            RelativePath.RegisterGlob(pattern, exclude, include);
                     }
 
                     int totalCount = exclude.Count + include.Count;
 
                     if (totalCount > 0)
                     {
-                        UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Loaded {totalCount} steam exclude patterns for mod {mod.id}");
+                        UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Loaded {totalCount} Steam exclude patterns for mod {mod.id}");
                     }
                 }
             }
@@ -140,8 +129,6 @@ namespace UQLExtra.Parameters
             {
                 UnityEngine.Debug.LogWarning($"[{UQLExtra.info.Metadata.Name}] Failed to read exclude_steam from {modInfoPath}: {ex.Message}");
             }
-
-            return (include,exclude);
         }
 
         internal static IEnumerator DeleteAfterUploadFinishes(RainWorldSteamManager manager, string tempDir)
@@ -156,12 +143,12 @@ namespace UQLExtra.Parameters
                 if (Directory.Exists(tempDir))
                 {
                     Directory.Delete(tempDir, true);
-                    UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Temporary folder deleted: {tempDir.Replace(Path.DirectorySeparatorChar, '/')}");
+                    UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Temporary directory deleted: {tempDir.Replace(Path.DirectorySeparatorChar, '/')}");
                 }
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogError($"[{UQLExtra.info.Metadata.Name}] Failed to delete temp folder: {ex.Message}");
+                UnityEngine.Debug.LogError($"[{UQLExtra.info.Metadata.Name}] Failed to delete temporary directory: {ex.Message}");
             }
         }
 
