@@ -1,9 +1,6 @@
 {
-  "Name": "Extra Parameters",
-  "ID": "uql.extra",
-  "Version": "1.0.8",
   "WorkshopID": 3557598109,
-  "LatestGameVersion": "v1.10.4",
+  "LatestGameVersion": "v1.11.3",
   "UpdateTitle": true,
   "UpdateDescription": true,
   "MarkAsPublic": true,
