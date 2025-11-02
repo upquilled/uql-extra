@@ -1,4 +1,5 @@
 source/obj/**
+.vs/**
 
 .DS_Store
 Thumbs.db

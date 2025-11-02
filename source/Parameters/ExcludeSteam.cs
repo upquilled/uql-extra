@@ -6,6 +6,7 @@ using Kittehface.Build.Json;
 using System.Collections;
 using UnityEngine;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace UQLExtra.Parameters
 {
@@ -133,9 +134,17 @@ namespace UQLExtra.Parameters
 
         internal static IEnumerator DeleteAfterUploadFinishes(RainWorldSteamManager manager, string tempDir)
         {
-            while (manager.updateItemCallback.IsActive())
-                yield return null;
+            var callback = typeof(RainWorldSteamManager)
+                .GetField("updateItemCallback",
+                    BindingFlags.Instance
+                  | BindingFlags.Public
+                  | BindingFlags.NonPublic).GetValue(manager);
+            
+            var isActive = callback.GetType().GetMethod("IsActive");
 
+            while ((bool)isActive.Invoke(callback, null))
+                yield return null;
+            
             yield return new WaitForSeconds(pollingDelay);
 
             try
