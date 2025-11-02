@@ -120,10 +120,7 @@ namespace UQLExtra.Parameters
 
                     int totalCount = exclude.Count + include.Count;
 
-                    if (totalCount > 0)
-                    {
-                        UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Loaded {totalCount} Steam exclude patterns for mod {mod.id}");
-                    }
+                    UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Loaded {totalCount} Steam exclude pattern{(totalCount == 1 ? "" : "s")} for mod {mod.id}");
                 }
             }
             catch (Exception ex)
@@ -188,7 +185,7 @@ namespace UQLExtra.Parameters
                     if (reqNameArray != null) modInfo["requirements_names"] = newNameArray;
                 }
 
-                UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Removed uql.extra dependency from modinfo for {id} because no relevant parameters were found in modinfo,json");
+                UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Removed uql.extra dependency from modinfo for {id} because no relevant parameters were found in modinfo.json");
             }
         }
     }

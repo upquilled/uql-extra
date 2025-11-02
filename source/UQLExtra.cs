@@ -6,7 +6,7 @@ using BepInEx.Logging;
 
 namespace UQLExtra;
 
-[BepInPlugin("uql.extra", "Extra Parameters", "1.0.10")]
+[BepInPlugin("uql.extra", "Extra Parameters", "1.0.11")]
 public partial class UQLExtra : BaseUnityPlugin
 {
     internal static ManualLogSource LoggerInstance;
