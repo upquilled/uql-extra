@@ -22,7 +22,7 @@ namespace UQLExtra
                     }
                     catch (Exception ex)
                     {
-                        UnityEngine.Debug.LogError($"[{UQLExtra.info.Metadata.Name}] Failed to start cleanup coroutine for {tempDir}: {ex}");
+                        UQLExtra.LError($"Failed to start cleanup coroutine for {tempDir}", ex);
                     }
 
 

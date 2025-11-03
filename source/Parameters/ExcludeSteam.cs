@@ -67,7 +67,7 @@ namespace UQLExtra.Parameters
                 }
                 catch (Exception ex)
                 {
-                    UnityEngine.Debug.LogWarning($"[{UQLExtra.info.Metadata.Name}] Failed to sanitize uql.extra from {modInfoPath}: {ex.Message}");
+                    UQLExtra.LWarn($"[{UQLExtra.info.Metadata.Name}] Failed to sanitize uql.extra from {modInfoPath}", ex);
                 }
             }
 
@@ -120,12 +120,12 @@ namespace UQLExtra.Parameters
 
                     int totalCount = exclude.Count + include.Count;
 
-                    UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Loaded {totalCount} Steam exclude pattern{(totalCount == 1 ? "" : "s")} for mod {mod.id}");
+                    UQLExtra.LInfo($"[{UQLExtra.info.Metadata.Name}] Loaded {totalCount} Steam exclude pattern{(totalCount == 1 ? "" : "s")} for mod {mod.id}");
                 }
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogWarning($"[{UQLExtra.info.Metadata.Name}] Failed to read exclude_steam from {modInfoPath}: {ex.Message}");
+                UQLExtra.LWarn($"[{UQLExtra.info.Metadata.Name}] Failed to read exclude_steam from {modInfoPath}", ex);
             }
         }
 
@@ -149,12 +149,12 @@ namespace UQLExtra.Parameters
                 if (Directory.Exists(tempDir))
                 {
                     Directory.Delete(tempDir, true);
-                    UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Temporary directory deleted: {tempDir.Replace(Path.DirectorySeparatorChar, '/')}");
+                    UQLExtra.LInfo($"Temporary directory deleted: {tempDir.Replace(Path.DirectorySeparatorChar, '/')}");
                 }
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogError($"[{UQLExtra.info.Metadata.Name}] Failed to delete temporary directory: {ex.Message}");
+                UQLExtra.LError($"Failed to delete temporary directory", ex);
             }
         }
 
@@ -185,7 +185,7 @@ namespace UQLExtra.Parameters
                     if (reqNameArray != null) modInfo["requirements_names"] = newNameArray;
                 }
 
-                UnityEngine.Debug.Log($"[{UQLExtra.info.Metadata.Name}] Removed uql.extra dependency from modinfo for {id} because no relevant parameters were found in modinfo.json");
+                UQLExtra.LInfo($"Removed uql.extra dependency from modinfo for {id} because no relevant parameters were found in modinfo.json");
             }
         }
     }

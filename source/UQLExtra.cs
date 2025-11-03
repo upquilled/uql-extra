@@ -1,12 +1,13 @@
 ﻿using BepInEx;
 using System.Security;
 using BepInEx.Logging;
+using System;
 
 [module: UnverifiableCode]
 
 namespace UQLExtra;
 
-[BepInPlugin("uql.extra", "Extra Parameters", "1.0.11")]
+[BepInPlugin("uql.extra", "Extra Parameters", "1.0.12")]
 public partial class UQLExtra : BaseUnityPlugin
 {
     internal static ManualLogSource LoggerInstance;
@@ -30,5 +31,20 @@ public partial class UQLExtra : BaseUnityPlugin
 
         _initialized = true;
         Hooks.ApplyInit();
+    }
+
+    public static void LInfo(string message)
+    {
+        UnityEngine.Debug.Log($"[Info   :{info.Metadata.Name}] " + message);
+    }
+
+    public static void LWarn(string message, Exception ex)
+    {
+        UnityEngine.Debug.LogWarning($"[Warning:{info.Metadata.Name}] {message}: {ex}");
+    }
+
+    public static void LError(string message, Exception ex)
+    {
+        UnityEngine.Debug.LogError($"[Error  :{info.Metadata.Name}] {message}: {ex}");
     }
 }
