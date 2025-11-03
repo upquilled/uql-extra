@@ -67,7 +67,7 @@ namespace UQLExtra.Parameters
                 }
                 catch (Exception ex)
                 {
-                    UQLExtra.LWarn($"[{UQLExtra.info.Metadata.Name}] Failed to sanitize uql.extra from {modInfoPath}", ex);
+                    UQLExtra.LWarn($"Failed to sanitize uql.extra from {modInfoPath}", ex);
                 }
             }
 
@@ -120,12 +120,12 @@ namespace UQLExtra.Parameters
 
                     int totalCount = exclude.Count + include.Count;
 
-                    UQLExtra.LInfo($"[{UQLExtra.info.Metadata.Name}] Loaded {totalCount} Steam exclude pattern{(totalCount == 1 ? "" : "s")} for mod {mod.id}");
+                    UQLExtra.LInfo($"Loaded {totalCount} Steam exclude pattern{(totalCount == 1 ? "" : "s")} for mod {mod.id}");
                 }
             }
             catch (Exception ex)
             {
-                UQLExtra.LWarn($"[{UQLExtra.info.Metadata.Name}] Failed to read exclude_steam from {modInfoPath}", ex);
+                UQLExtra.LWarn($"Failed to read exclude_steam from {modInfoPath}", ex);
             }
         }
 
