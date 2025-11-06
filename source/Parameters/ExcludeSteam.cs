@@ -13,7 +13,7 @@ namespace UQLExtra.Parameters
     public static class ExcludeSteam
     {
         public const float pollingDelay = 0.5f;
-        public static void PrepareUpload(ModManager.Mod mod, out string tempDir, out bool deleteAfter)
+        public static void PrepareUpload(ModManager.Mod mod, out string tempDir, out bool dryRun)
         {
             string sourceDir = mod.path;
             tempDir = GetUniqueTempFolder(sourceDir);
@@ -36,7 +36,7 @@ namespace UQLExtra.Parameters
                 }
             }
 
-            deleteAfter = false;
+            dryRun = false;
             bool keepDependency = false;
 
             // Modify modinfo.json if uql.extra contains only exclude_steam
@@ -52,7 +52,7 @@ namespace UQLExtra.Parameters
                     {
                         if (extra["exclude_steam"] is JsonObject excludeSteam)
                         {
-                            deleteAfter = (excludeSteam["delete_temp"] as bool?) ?? false;
+                            dryRun = (excludeSteam["dry_run"] as bool?) ?? false;
                             keepDependency = (excludeSteam["keep_dependency"] as bool?) ?? false;
                         }
 
