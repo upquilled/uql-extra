@@ -7,7 +7,7 @@ using System;
 
 namespace UQLExtra;
 
-[BepInPlugin("uql.extra", "Extra Parameters", "1.0.14")]
+[BepInPlugin("uql.extra", "Extra Parameters", "1.0.15")]
 public partial class UQLExtra : BaseUnityPlugin
 {
     internal static ManualLogSource LoggerInstance;
@@ -43,8 +43,18 @@ public partial class UQLExtra : BaseUnityPlugin
         UnityEngine.Debug.LogWarning($"[Warning:{info.Metadata.Name}] {message}: {ex}");
     }
 
+    public static void LWarn(string message)
+    {
+        UnityEngine.Debug.LogWarning($"[Warning:{info.Metadata.Name}] {message}");
+    }
+
     public static void LError(string message, Exception ex)
     {
         UnityEngine.Debug.LogError($"[Error  :{info.Metadata.Name}] {message}: {ex}");
+    }
+
+    public static void LError(string message)
+    {
+        UnityEngine.Debug.LogError($"[Error  :{info.Metadata.Name}] {message}");
     }
 }

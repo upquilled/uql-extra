@@ -13,10 +13,10 @@ namespace UQLExtra.Parameters
     public static class ExcludeSteam
     {
         public const float pollingDelay = 0.5f;
-        public static void PrepareUpload(ModManager.Mod mod, out string tempDir, out bool dryRun)
+        public static void PrepareUpload(ModManager.Mod mod, out bool dryRun, out string sourceDir)
         {
-            string sourceDir = mod.path;
-            tempDir = GetUniqueTempFolder(sourceDir);
+            sourceDir = mod.path;
+            string tempDir = GetUniqueTempFolder(sourceDir);
 
             Directory.CreateDirectory(tempDir);
 
@@ -129,8 +129,13 @@ namespace UQLExtra.Parameters
             }
         }
 
-        internal static IEnumerator DeleteAfterUploadFinishes(RainWorldSteamManager manager, string tempDir)
+        internal static IEnumerator DeleteAfterUploadFinishes(RainWorldSteamManager manager, ModManager.Mod mod, string sourceDir)
         {
+            if (mod.path == sourceDir)
+            {
+                UQLExtra.LError($"Temporary directory cannot be equal to source directory: both {sourceDir}");
+                yield return null;
+            }
             var callback = typeof(RainWorldSteamManager)
                 .GetField("updateItemCallback",
                     BindingFlags.Instance
@@ -146,16 +151,18 @@ namespace UQLExtra.Parameters
 
             try
             {
-                if (Directory.Exists(tempDir))
+                if (Directory.Exists(mod.path))
                 {
-                    Directory.Delete(tempDir, true);
-                    UQLExtra.LInfo($"Temporary directory deleted: {tempDir.Replace(Path.DirectorySeparatorChar, '/')}");
+                    Directory.Delete(mod.path, true);
+                    UQLExtra.LInfo($"Temporary directory deleted: {mod.path.Replace(Path.DirectorySeparatorChar, '/')}");
                 }
             }
             catch (Exception ex)
             {
                 UQLExtra.LError($"Failed to delete temporary directory", ex);
             }
+
+            mod.path = sourceDir;
         }
 
         private static void removeDependency(JsonObject modInfo, bool keepDependency, string id)

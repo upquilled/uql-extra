@@ -15,7 +15,7 @@ namespace UQLExtra
         {
             On.RainWorldSteamManager.UploadWorkshopMod += (orig, self, mod, unlisted) =>
             {
-                ExcludeSteam.PrepareUpload(mod, out string tempDir, out bool dryRun);
+                ExcludeSteam.PrepareUpload(mod, out bool dryRun, out string sourceDir);
 
                 if (!dryRun)
                 {
@@ -23,11 +23,11 @@ namespace UQLExtra
 
                     try
                     {
-                        RelativePath.CoroutineRunner.Instance.StartCoroutine(ExcludeSteam.DeleteAfterUploadFinishes(self, tempDir));
+                        RelativePath.CoroutineRunner.Instance.StartCoroutine(ExcludeSteam.DeleteAfterUploadFinishes(self, mod, sourceDir));
                     }
                     catch (Exception ex)
                     {
-                        UQLExtra.LError($"Failed to start cleanup coroutine for {tempDir}", ex);
+                        UQLExtra.LError($"Failed to start cleanup coroutine for {mod.path}", ex);
                     }
                     return result;
                 }
@@ -41,7 +41,8 @@ namespace UQLExtra
                 
                 if (!(bool)initUpload.Invoke(self, null)) return false;
                 isCurrentlyUploading.SetValue(self, false);
-                lastUploadFail.SetValue(self, $"exclude_steam debug directory has been created at {tempDir.Replace("\\", "/")}");
+                lastUploadFail.SetValue(self, $"exclude_steam debug directory has been created at {mod.path.Replace("\\", "/")}");
+                mod.path = sourceDir;
                 return false;
             };
         }
