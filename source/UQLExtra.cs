@@ -7,7 +7,7 @@ using System;
 
 namespace UQLExtra;
 
-[BepInPlugin("uql.extra", "Extra Parameters", "1.0.15")]
+[BepInPlugin("uql.extra", "Extra Parameters", "1.0.16")]
 public partial class UQLExtra : BaseUnityPlugin
 {
     internal static ManualLogSource LoggerInstance;
